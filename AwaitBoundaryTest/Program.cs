@@ -65,6 +65,10 @@ namespace AwaitBoundaryTest
     {
         // Ensure the JIT can see that we are setting the local to null
         // ( I am pretty sure it works even with MethodImplOptions.NoInlining, but meh )
+        // The main idea of this method is to be very explicit about clearing references,
+        // because sometimes the IDE may bitch about redundant assignments.
+        // With an IDE, it is also possible to now track usages of this method,
+        // developing a better understanding of the codebase
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ClearReference<T>(ref T reference)
             where T: class
