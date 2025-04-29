@@ -28,9 +28,7 @@ namespace AwaitBoundaryTest
 
             var consumeGCObjectTask = ConsumeGCObject(gcObject);
 
-            // ReSharper disable once RedundantAssignment
-            // Need to set it to null to GC collect early
-            gcObject = null;
+            GCHelpers.ClearReference(ref gcObject);
 
             await Task.Yield();
 
@@ -48,9 +46,7 @@ namespace AwaitBoundaryTest
         {
             DoWorkWithGCObject(gcObject);
 
-            // ReSharper disable once RedundantAssignment
-            // Need to set it to null to GC collect early
-            gcObject = null!;
+            GCHelpers.ClearReference(ref gcObject);
 
             await Task.Delay(1_000_000);
 
@@ -62,6 +58,18 @@ namespace AwaitBoundaryTest
         {
             // Simulate some work with the GCObject
             Console.WriteLine($"Working with GCObject: {gcObject.Value}");
+        }
+    }
+
+    public static class GCHelpers
+    {
+        // Ensure the JIT can see that we are setting the local to null
+        // ( I am pretty sure it works even with MethodImplOptions.NoInlining, but meh )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ClearReference<T>(ref T reference)
+            where T: class
+        {
+            reference = null!;
         }
     }
 }
